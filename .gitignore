@@ -1,0 +1,15 @@
+# Build output
+bin/
+obj/
+
+# Emulator and ROMs
+**/emulator/
+**/emulators/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# NuGet
+packages/
