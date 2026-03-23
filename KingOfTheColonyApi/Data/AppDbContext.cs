@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<QueueEntry> QueueEntries => Set<QueueEntry>();
     public DbSet<Spectator> Spectators => Set<Spectator>();
     public DbSet<MatchHistory> MatchHistories => Set<MatchHistory>();
+    public DbSet<MatchSession> MatchSessions => Set<MatchSession>();
     public DbSet<CreditTransaction> CreditTransactions => Set<CreditTransaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,6 +47,18 @@ public class AppDbContext : DbContext
         {
             e.HasOne(m => m.Winner).WithMany().HasForeignKey(m => m.WinnerId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(m => m.Loser).WithMany().HasForeignKey(m => m.LoserId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<MatchSession>(e =>
+        {
+            e.HasIndex(m => new { m.GameRoomId, m.Status });
+            e.HasOne(m => m.GameRoom).WithMany(r => r.MatchSessions).HasForeignKey(m => m.GameRoomId);
+            e.HasOne(m => m.KingUser).WithMany().HasForeignKey(m => m.KingUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(m => m.ChallengerUser).WithMany().HasForeignKey(m => m.ChallengerUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(m => m.WinnerUser).WithMany().HasForeignKey(m => m.WinnerUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(m => m.LoserUser).WithMany().HasForeignKey(m => m.LoserUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(m => m.CreatedByUser).WithMany().HasForeignKey(m => m.CreatedByUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(m => m.ReportedByUser).WithMany().HasForeignKey(m => m.ReportedByUserId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<CreditTransaction>(e =>

@@ -15,6 +15,7 @@ namespace GGPOLauncher;
 public partial class MainWindow : Window
 {
     private readonly IEmulatorLauncher _launcher = new FbNeoLauncher();
+    private MatchSessionCoordinator? _matchCoordinator;
     private INetworkManager? _networkManager;
     private CancellationTokenSource? _cts;
     private string _publicIp = "";
@@ -183,6 +184,19 @@ public partial class MainWindow : Window
         _realtimeClient.YourTurn += userId => Dispatcher.Invoke(() => OnYourTurn(userId));
         _realtimeClient.StatusMessage += message => Dispatcher.Invoke(() => TxtRealtimeStatus.Text = message);
         await _realtimeClient.ConnectAsync(_apiBaseUrl, auth.Token);
+
+        if (_matchCoordinator is not null)
+        {
+            await _matchCoordinator.DisposeAsync();
+        }
+
+        _matchCoordinator = new MatchSessionCoordinator(
+            this,
+            _apiClient!,
+            _launcher,
+            SetMatchStatus,
+            RefreshDashboardAsync,
+            UpdateRoomState);
 
         PanelLogin.Visibility = Visibility.Collapsed;
         PanelDashboard.Visibility = Visibility.Visible;
@@ -354,6 +368,12 @@ public partial class MainWindow : Window
         _selectedRoom = null;
         _apiClient = null;
 
+        if (_matchCoordinator is not null)
+        {
+            _ = _matchCoordinator.DisposeAsync();
+            _matchCoordinator = null;
+        }
+
         if (_realtimeClient is not null)
         {
             _ = _realtimeClient.DisposeAsync();
@@ -364,6 +384,7 @@ public partial class MainWindow : Window
         PanelLegacyLauncher.Visibility = Visibility.Collapsed;
         PanelLogin.Visibility = Visibility.Visible;
         TxtLoginStatus.Text = "Sesión cerrada.";
+        SetMatchStatus("No hay partida en seguimiento.");
     }
 
     private async void BtnCreateRoom_Click(object sender, RoutedEventArgs e)
@@ -485,6 +506,7 @@ public partial class MainWindow : Window
     private void UpdateRoomState(RoomStateDto room)
     {
         _selectedRoom = room;
+        _matchCoordinator?.UpdateRoom(room);
         TxtRoomStatus.Text = $"Sala #{room.RoomId} | Estado: {room.Status}";
         TxtKingInfo.Text = room.King is null
             ? "Rey actual: pendiente"
@@ -493,8 +515,24 @@ public partial class MainWindow : Window
             ? "Retador actual: esperando siguiente jugador"
             : $"Retador actual: {room.Challenger.DisplayName} | W:{room.Challenger.Wins} L:{room.Challenger.Losses}";
         TxtSpectatorCount.Text = $"Espectadores: {room.SpectatorCount}";
+        TxtActiveMatchState.Text = _matchCoordinator?.ActiveSession?.RoomId == room.RoomId
+            ? $"Partida activa: {_matchCoordinator.ActiveSession.State}"
+            : "No hay partida activa en esta sala.";
         ListQueue.ItemsSource = room.Queue.Select(q =>
             $"#{q.Position} {q.User.DisplayName} | W:{q.User.Wins} L:{q.User.Losses} | desde {q.JoinedAt:HH:mm}");
+    }
+
+    private void SetMatchStatus(string message)
+    {
+        TxtRealtimeStatus.Text = message;
+        TxtActiveMatchBanner.Text = message;
+
+        if (_selectedRoom is not null)
+        {
+            TxtActiveMatchState.Text = _matchCoordinator?.ActiveSession?.RoomId == _selectedRoom.RoomId
+                ? $"Partida activa: {_matchCoordinator.ActiveSession.State}"
+                : message;
+        }
     }
 
     private void OnYourTurn(int userId)
@@ -587,7 +625,11 @@ public partial class MainWindow : Window
 
         try
         {
-            if (_isHost)
+            if (_matchCoordinator is not null)
+            {
+                await _matchCoordinator.StartMatchAsync(payload, _selectedRoom, _currentUser, _isHost);
+            }
+            else if (_isHost)
             {
                 _launcher.LaunchAsHost(payload.UdpPort, payload.GameRom);
             }
@@ -613,6 +655,11 @@ public partial class MainWindow : Window
     protected override async void OnClosed(EventArgs e)
     {
         CleanupNetwork();
+
+        if (_matchCoordinator is not null)
+        {
+            await _matchCoordinator.DisposeAsync();
+        }
 
         if (_realtimeClient is not null)
         {

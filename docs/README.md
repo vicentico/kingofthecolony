@@ -14,12 +14,15 @@ La aplicación **no maneja el netcode del juego**. Su función es exclusivamente
 
 ## Documentación disponible
 
-| Documento                                | Descripción                                                            |
-| ---------------------------------------- | ---------------------------------------------------------------------- |
-| [ARCHITECTURE.md](ARCHITECTURE.md)       | Arquitectura del proyecto, capas, clases y responsabilidades           |
-| [SETUP-EMULATOR.md](SETUP-EMULATOR.md)   | Guía paso a paso para configurar FBNeo, ROMs y la carpeta del emulador |
-| [NETWORK-FLOW.md](NETWORK-FLOW.md)       | Flujo completo de conexión, protocolo de handshake y lanzamiento       |
-| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Problemas comunes y soluciones paso a paso                             |
+| Documento                                                            | Descripción                                                                      |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [ARCHITECTURE.md](ARCHITECTURE.md)                                   | Arquitectura del proyecto, capas, clases y responsabilidades                     |
+| [DATA-MODEL.md](DATA-MODEL.md)                                       | Modelo de datos del backend, entidades, relaciones y restricciones               |
+| [DATA-MODEL-DIAGRAM.md](DATA-MODEL-DIAGRAM.md)                       | Diagrama Mermaid separado del modelo de datos para arquitectura y presentaciones |
+| [MATCH-FLOW-AND-OVERLAY-DESIGN.md](MATCH-FLOW-AND-OVERLAY-DESIGN.md) | Flujo de cierre de partida, overlay WPF y contrato launcher/API                  |
+| [SETUP-EMULATOR.md](SETUP-EMULATOR.md)                               | Guía paso a paso para configurar FBNeo, ROMs y la carpeta del emulador           |
+| [NETWORK-FLOW.md](NETWORK-FLOW.md)                                   | Flujo completo de conexión, protocolo de handshake y lanzamiento                 |
+| [TROUBLESHOOTING.md](TROUBLESHOOTING.md)                             | Problemas comunes y soluciones paso a paso                                       |
 
 ---
 

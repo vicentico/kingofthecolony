@@ -24,4 +24,5 @@ public class GameRoom
 
     public List<QueueEntry> Queue { get; set; } = [];
     public List<Spectator> Spectators { get; set; } = [];
+    public List<MatchSession> MatchSessions { get; set; } = [];
 }

@@ -1,0 +1,86 @@
+<Window x:Class="GGPOLauncher.Views.OverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="OverlayWindow"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ShowActivated="False"
+        Width="800"
+        Height="600">
+    <Grid IsHitTestVisible="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="72"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="42"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Margin="16,12,16,0"
+                CornerRadius="14"
+                Background="#CC0F172A"
+                Padding="18,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding KingLabel}"
+                           Foreground="#FDE68A"
+                           FontSize="17"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Column="1"
+                            Margin="28,0"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="{Binding RoomTitle}"
+                               Foreground="#F9FAFB"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding StatusText}"
+                               Margin="0,4,0,0"
+                               Foreground="#A7F3D0"
+                               FontSize="12"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <TextBlock Grid.Column="2"
+                           Text="{Binding ChallengerLabel}"
+                           Foreground="#93C5FD"
+                           FontSize="17"
+                           FontWeight="Bold"
+                           TextAlignment="Right"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2"
+                Margin="16,0,16,12"
+                CornerRadius="12"
+                Background="#B2111827"
+                Padding="16,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding QueueSummary}"
+                           Foreground="#E5E7EB"
+                           FontSize="13"
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding SpectatorSummary}"
+                           Foreground="#CBD5E1"
+                           FontSize="13"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

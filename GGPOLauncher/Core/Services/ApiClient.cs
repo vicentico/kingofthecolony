@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using GGPOLauncher.Core.Interfaces;
 using GGPOLauncher.Core.Models;
 
@@ -10,7 +11,10 @@ namespace GGPOLauncher.Core.Services;
 public sealed class ApiClient : IApiClient
 {
     private readonly HttpClient _http;
-    private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
 
     public string? Token { get; private set; }
     public UserProfile? CurrentUser { get; private set; }
@@ -92,6 +96,53 @@ public sealed class ApiClient : IApiClient
     {
         var response = await _http.PostAsync($"api/rooms/{roomId}/join-queue", null);
         await EnsureSuccessWithMessageAsync(response);
+    }
+
+    public async Task<MatchSessionDto> CreateMatchSessionAsync(int roomId, CreateMatchSessionRequest request)
+    {
+        var response = await _http.PostAsJsonAsync($"api/rooms/{roomId}/matches", request, _jsonOptions);
+        await EnsureSuccessWithMessageAsync(response);
+
+        return await response.Content.ReadFromJsonAsync<MatchSessionDto>(_jsonOptions)
+            ?? throw new InvalidOperationException("No se pudo crear la sesión de partida.");
+    }
+
+    public async Task<MatchSessionDto> MarkMatchStartedAsync(int roomId, Guid matchSessionId, StartMatchSessionRequest request)
+    {
+        var response = await _http.PostAsJsonAsync($"api/rooms/{roomId}/matches/{matchSessionId}/started", request, _jsonOptions);
+        await EnsureSuccessWithMessageAsync(response);
+
+        return await response.Content.ReadFromJsonAsync<MatchSessionDto>(_jsonOptions)
+            ?? throw new InvalidOperationException("No se pudo marcar la sesión como iniciada.");
+    }
+
+    public async Task<MatchSessionCompletionResponse> CompleteMatchSessionAsync(int roomId, Guid matchSessionId, CompleteMatchSessionRequest request)
+    {
+        var response = await _http.PostAsJsonAsync($"api/rooms/{roomId}/matches/{matchSessionId}/complete", request, _jsonOptions);
+        await EnsureSuccessWithMessageAsync(response);
+
+        return await response.Content.ReadFromJsonAsync<MatchSessionCompletionResponse>(_jsonOptions)
+            ?? throw new InvalidOperationException("No se pudo registrar el resultado de la partida.");
+    }
+
+    public async Task<MatchSessionDto> CancelMatchSessionAsync(int roomId, Guid matchSessionId, CancelMatchSessionRequest request)
+    {
+        var response = await _http.PostAsJsonAsync($"api/rooms/{roomId}/matches/{matchSessionId}/cancel", request, _jsonOptions);
+        await EnsureSuccessWithMessageAsync(response);
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>(_jsonOptions);
+        return payload.GetProperty("session").Deserialize<MatchSessionDto>(_jsonOptions)
+            ?? throw new InvalidOperationException("No se pudo cancelar la sesión de partida.");
+    }
+
+    public async Task<MatchSessionDto> ReviewMatchSessionAsync(int roomId, Guid matchSessionId, ReviewMatchSessionRequest request)
+    {
+        var response = await _http.PostAsJsonAsync($"api/rooms/{roomId}/matches/{matchSessionId}/review", request, _jsonOptions);
+        await EnsureSuccessWithMessageAsync(response);
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>(_jsonOptions);
+        return payload.GetProperty("session").Deserialize<MatchSessionDto>(_jsonOptions)
+            ?? throw new InvalidOperationException("No se pudo marcar la partida para revisión.");
     }
 
     public async Task<int> AddCreditsAsync(int amount)

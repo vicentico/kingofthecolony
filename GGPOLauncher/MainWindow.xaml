@@ -383,6 +383,11 @@
                                    Margin="0,8,0,0"
                                    FontSize="14"
                                    Foreground="#9CA3AF"/>
+                        <TextBlock x:Name="TxtActiveMatchBanner"
+                                   Margin="0,8,0,0"
+                                   FontSize="13"
+                                   Foreground="#A7F3D0"
+                                   Text="No hay partida en seguimiento."/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1"
@@ -510,6 +515,11 @@
                             <TextBlock x:Name="TxtSpectatorCount"
                                        Margin="0,8,0,0"
                                        Foreground="#9CA3AF"/>
+                            <TextBlock x:Name="TxtActiveMatchState"
+                                       Margin="0,8,0,0"
+                                       Foreground="#A7F3D0"
+                                       FontSize="13"
+                                       TextWrapping="Wrap"/>
 
                             <TextBlock Text="Cola visible"
                                        Margin="0,18,0,0"

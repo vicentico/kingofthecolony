@@ -100,6 +100,87 @@ public class RoomsController : ControllerBase
         return Ok(new { message, nextChallengerId });
     }
 
+    [HttpPost("{id:int}/matches")]
+    public async Task<IActionResult> CreateMatchSession(int id, [FromBody] CreateMatchSessionRequest request)
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+
+        var (success, message, session) = await _rooms.CreateMatchSessionAsync(id, userId.Value, request);
+        if (!success || session is null) return BadRequest(new { message });
+
+        await _hub.Clients.Group($"room-{id}").SendAsync("MatchCreated", session);
+        return Ok(session);
+    }
+
+    [HttpPost("{id:int}/matches/{matchSessionId:guid}/started")]
+    public async Task<IActionResult> MarkMatchStarted(int id, Guid matchSessionId, [FromBody] StartMatchSessionRequest request)
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+
+        var (success, message, session) = await _rooms.MarkMatchSessionStartedAsync(id, matchSessionId, userId.Value, request);
+        if (!success || session is null) return BadRequest(new { message });
+
+        await _hub.Clients.Group($"room-{id}").SendAsync("MatchStarted", session);
+        return Ok(session);
+    }
+
+    [HttpPost("{id:int}/matches/{matchSessionId:guid}/complete")]
+    public async Task<IActionResult> CompleteMatchSession(int id, Guid matchSessionId, [FromBody] CompleteMatchSessionRequest request)
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+
+        var (success, message, result) = await _rooms.CompleteMatchSessionAsync(id, matchSessionId, userId.Value, request);
+        if (!success || result is null) return BadRequest(new { message });
+
+        await _hub.Clients.Group($"room-{id}").SendAsync("RoomUpdated", result.RoomState);
+        await _hub.Clients.Group($"room-{id}").SendAsync("MatchCompleted", result);
+
+        if (result.NextChallengerId.HasValue)
+        {
+            await _hub.Clients.Group($"room-{id}")
+                .SendAsync("YourTurn", result.NextChallengerId.Value);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPost("{id:int}/matches/{matchSessionId:guid}/cancel")]
+    public async Task<IActionResult> CancelMatchSession(int id, Guid matchSessionId, [FromBody] CancelMatchSessionRequest request)
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+
+        var (success, message, session) = await _rooms.CancelMatchSessionAsync(id, matchSessionId, userId.Value, request);
+        if (!success || session is null) return BadRequest(new { message });
+
+        var roomState = await _rooms.GetRoomStateAsync(id);
+        if (roomState is not null)
+            await _hub.Clients.Group($"room-{id}").SendAsync("RoomUpdated", roomState);
+
+        await _hub.Clients.Group($"room-{id}").SendAsync("MatchCancelled", session);
+        return Ok(new { message, session });
+    }
+
+    [HttpPost("{id:int}/matches/{matchSessionId:guid}/review")]
+    public async Task<IActionResult> MarkMatchForReview(int id, Guid matchSessionId, [FromBody] ReviewMatchSessionRequest request)
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+
+        var (success, message, session) = await _rooms.MarkMatchSessionPendingReviewAsync(id, matchSessionId, userId.Value, request);
+        if (!success || session is null) return BadRequest(new { message });
+
+        var roomState = await _rooms.GetRoomStateAsync(id);
+        if (roomState is not null)
+            await _hub.Clients.Group($"room-{id}").SendAsync("RoomUpdated", roomState);
+
+        await _hub.Clients.Group($"room-{id}").SendAsync("MatchAwaitingResult", session);
+        return Ok(new { message, session });
+    }
+
     private int? GetUserId()
     {
         var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

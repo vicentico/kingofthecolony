@@ -17,6 +17,11 @@ public interface IApiClient
     Task<RoomStateDto> CreateRoomAsync(string name, string hostIp);
     Task JoinSpectatorAsync(int roomId);
     Task JoinQueueAsync(int roomId);
+    Task<MatchSessionDto> CreateMatchSessionAsync(int roomId, CreateMatchSessionRequest request);
+    Task<MatchSessionDto> MarkMatchStartedAsync(int roomId, Guid matchSessionId, StartMatchSessionRequest request);
+    Task<MatchSessionCompletionResponse> CompleteMatchSessionAsync(int roomId, Guid matchSessionId, CompleteMatchSessionRequest request);
+    Task<MatchSessionDto> CancelMatchSessionAsync(int roomId, Guid matchSessionId, CancelMatchSessionRequest request);
+    Task<MatchSessionDto> ReviewMatchSessionAsync(int roomId, Guid matchSessionId, ReviewMatchSessionRequest request);
     Task<int> AddCreditsAsync(int amount);
     Task<List<CreditTransactionDto>> GetCreditHistoryAsync();
 }

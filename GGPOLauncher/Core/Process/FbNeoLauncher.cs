@@ -13,18 +13,18 @@ public sealed class FbNeoLauncher : IEmulatorLauncher
         Path.Combine(AppContext.BaseDirectory, "emulator", "fbneo.exe")
     ];
 
-    public void LaunchAsHost(int udpPort, string gameRom)
+    public System.Diagnostics.Process LaunchAsHost(int udpPort, string gameRom)
     {
         var exePath = FindExecutable();
         var args = $"{gameRom} -net {udpPort}";
-        Launch(exePath, args);
+        return Launch(exePath, args);
     }
 
-    public void LaunchAsClient(string hostIp, int udpPort, string gameRom)
+    public System.Diagnostics.Process LaunchAsClient(string hostIp, int udpPort, string gameRom)
     {
         var exePath = FindExecutable();
         var args = $"{gameRom} -net {hostIp}:{udpPort}";
-        Launch(exePath, args);
+        return Launch(exePath, args);
     }
 
     private static string FindExecutable()
@@ -44,7 +44,7 @@ public sealed class FbNeoLauncher : IEmulatorLauncher
         throw new FileNotFoundException("fbneo.exe no encontrado.");
     }
 
-    private static void Launch(string exePath, string arguments)
+    private static System.Diagnostics.Process Launch(string exePath, string arguments)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -54,6 +54,10 @@ public sealed class FbNeoLauncher : IEmulatorLauncher
             WorkingDirectory = Path.GetDirectoryName(exePath)!
         };
 
-        System.Diagnostics.Process.Start(startInfo);
+        var process = System.Diagnostics.Process.Start(startInfo)
+            ?? throw new InvalidOperationException("No se pudo iniciar el emulador.");
+
+        process.EnableRaisingEvents = true;
+        return process;
     }
 }

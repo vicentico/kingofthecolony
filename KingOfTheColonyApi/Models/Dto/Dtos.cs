@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace KingOfTheColonyApi.Models.Dto;
 
 public record GoogleLoginRequest(string IdToken);
@@ -48,3 +50,44 @@ public record QueueEntryDto(int Position, UserSummary User, DateTime JoinedAt);
 public record AddCreditsRequest(int Amount);
 
 public record ReportMatchRequest(int RoomId, int WinnerId, int LoserId);
+
+public record CreateMatchSessionRequest(
+    int KingUserId,
+    int ChallengerUserId,
+    string GameRom,
+    string LaunchSource,
+    string ClientInstanceId);
+
+public record MatchSessionDto(
+    Guid MatchSessionId,
+    int RoomId,
+    string Status,
+    string GameRom,
+    UserSummary King,
+    UserSummary Challenger,
+    DateTime CreatedAtUtc,
+    DateTime? StartedAtUtc,
+    DateTime? EndedAtUtc);
+
+public record StartMatchSessionRequest(int EmulatorProcessId, DateTime? StartedAtUtc);
+
+public record CompleteMatchSessionRequest(
+    int WinnerUserId,
+    int LoserUserId,
+    string ResultSource,
+    int ReportedByUserId,
+    DateTime? EndedAtUtc,
+    JsonElement? Evidence,
+    string IdempotencyKey);
+
+public record CancelMatchSessionRequest(string Reason, int ReportedByUserId, DateTime? EndedAtUtc);
+
+public record ReviewMatchSessionRequest(string Reason, int ReportedByUserId, DateTime? EndedAtUtc);
+
+public record MatchSessionCompletionResponse(
+    Guid MatchSessionId,
+    string Status,
+    string Message,
+    int? NextChallengerId,
+    string? NextChallengerDisplayName,
+    RoomStateDto RoomState);
