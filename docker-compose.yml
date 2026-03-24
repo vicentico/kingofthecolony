@@ -1,0 +1,19 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: KingOfTheColonyApi/Dockerfile
+    image: kingofthecolony-api:local
+    container_name: kingofthecolony-api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      PORT: 8080
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection:?ConnectionStrings__DefaultConnection is required}
+      Jwt__Key: ${Jwt__Key:?Jwt__Key is required}
+      Jwt__Issuer: ${Jwt__Issuer:-KingOfTheColony}
+      Jwt__Audience: ${Jwt__Audience:-KingOfTheColonyApp}
+      Google__Enabled: ${Google__Enabled:-false}
+      Google__ClientId: ${Google__ClientId:-}
+      Google__ClientSecret: ${Google__ClientSecret:-}

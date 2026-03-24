@@ -1,5 +1,6 @@
 using System.Text;
 using KingOfTheColonyApi.Data;
+using KingOfTheColonyApi.Extensions;
 using KingOfTheColonyApi.Hubs;
 using KingOfTheColonyApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,13 +9,18 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = builder.Configuration["PORT"];
+if (!string.IsNullOrWhiteSpace(port))
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 // --- Database ---
+var defaultConnection = builder.Configuration.GetRequiredConnectionString("DefaultConnection", "ConnectionStrings__DefaultConnection");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Default") ?? "Data Source=kingofthecolony.db"));
+    options.UseNpgsql(defaultConnection));
 
 // --- Authentication (JWT) ---
-var jwtKey = builder.Configuration["Jwt:Key"]
-    ?? throw new InvalidOperationException("Jwt:Key must be configured in appsettings.json");
+var jwtKey = builder.Configuration.GetRequiredValue("Jwt:Key", "Jwt__Key");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

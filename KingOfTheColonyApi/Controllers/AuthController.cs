@@ -1,5 +1,6 @@
 using KingOfTheColonyApi.Models.Dto;
 using KingOfTheColonyApi.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KingOfTheColonyApi.Controllers;
@@ -15,6 +16,9 @@ public class AuthController : ControllerBase
     [HttpPost("google")]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
     {
+        if (!_auth.IsGoogleAuthEnabled())
+            return NotFound(new { message = "La autenticacion con Google esta deshabilitada." });
+
         try
         {
             var response = await _auth.AuthenticateWithGoogleAsync(request.IdToken);
@@ -23,6 +27,10 @@ public class AuthController : ControllerBase
         catch (Google.Apis.Auth.InvalidJwtException)
         {
             return Unauthorized(new { message = "Token de Google inválido." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = ex.Message });
         }
     }
 

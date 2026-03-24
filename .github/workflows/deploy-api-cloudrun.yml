@@ -1,0 +1,109 @@
+name: Deploy KingOfTheColony API to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/deploy-api-cloudrun.yml
+      - .dockerignore
+      - nuget.config
+      - KingOfTheColonyApi/**
+  workflow_dispatch:
+
+env:
+  API_PROJECT_PATH: ./KingOfTheColonyApi/KingOfTheColonyApi.csproj
+  DOCKERFILE_PATH: ./KingOfTheColonyApi/Dockerfile
+  IMAGE_NAME: kingofthecolony-api
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
+  SERVICE_NAME: ${{ vars.CLOUD_RUN_SERVICE }}
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore API dependencies
+        run: dotnet restore ${{ env.API_PROJECT_PATH }} --configfile ./nuget.config
+
+      - name: Build API
+        run: dotnet build ${{ env.API_PROJECT_PATH }} --configuration Release --no-restore
+
+      - name: Detect test projects
+        id: test-projects
+        shell: bash
+        run: |
+          if find . \( -name '*Tests.csproj' -o -name '*.Tests.csproj' \) | grep -q .; then
+            echo "has_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_tests=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run tests
+        if: steps.test-projects.outputs.has_tests == 'true'
+        shell: bash
+        run: |
+          while IFS= read -r project; do
+            dotnet test "$project" --configuration Release --no-build
+          done < <(find . \( -name '*Tests.csproj' -o -name '*.Tests.csproj' \))
+
+      - name: Skip tests message
+        if: steps.test-projects.outputs.has_tests != 'true'
+        run: echo "No test projects found. Skipping dotnet test."
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push image
+        env:
+          IMAGE_URI: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        run: |
+          docker build -f ${{ env.DOCKERFILE_PATH }} -t "$IMAGE_URI" .
+          docker push "$IMAGE_URI"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.REGION }}
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          flags: >-
+            --allow-unauthenticated
+            --port=8080
+          env_vars: |
+            ASPNETCORE_ENVIRONMENT=Production
+            PORT=8080
+            Jwt__Issuer=KingOfTheColony
+            Jwt__Audience=KingOfTheColonyApp
+            Google__Enabled=false
+          secrets: |
+            Jwt__Key=jwt-key:latest
+            ConnectionStrings__DefaultConnection=default-connection:latest
+
+      - name: Output deployed URL
+        run: echo "Cloud Run URL ${{ steps.deploy.outputs.url }}"

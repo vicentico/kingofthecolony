@@ -1,0 +1,17 @@
+.git
+.github
+.vs
+**/bin
+**/obj
+**/*.user
+**/*.suo
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/node_modules
+GGPOLauncher/
+docs/
+setup-cloudrun.md
+.env
+.env.*
+!.env.example

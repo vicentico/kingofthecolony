@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using Google.Apis.Auth;
 using KingOfTheColonyApi.Data;
+using KingOfTheColonyApi.Extensions;
 using KingOfTheColonyApi.Models;
 using KingOfTheColonyApi.Models.Dto;
 using Microsoft.EntityFrameworkCore;
@@ -24,10 +25,17 @@ public class AuthService
         _passwordHashService = passwordHashService;
     }
 
+    public bool IsGoogleAuthEnabled()
+    {
+        return _config.GetValue<bool>("Google:Enabled");
+    }
+
     public async Task<AuthResponse> AuthenticateWithGoogleAsync(string idToken)
     {
-        var googleClientId = _config["Google:ClientId"]
-            ?? throw new InvalidOperationException("Google:ClientId not configured");
+        if (!IsGoogleAuthEnabled())
+            throw new InvalidOperationException("La autenticacion con Google esta deshabilitada.");
+
+        var googleClientId = _config.GetRequiredValue("Google:ClientId", "Google__ClientId");
 
         var settings = new GoogleJsonWebSignature.ValidationSettings
         {
@@ -165,8 +173,7 @@ public class AuthService
 
     private string GenerateJwt(User user)
     {
-        var key = _config["Jwt:Key"]
-            ?? throw new InvalidOperationException("Jwt:Key not configured");
+        var key = _config.GetRequiredValue("Jwt:Key", "Jwt__Key");
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
