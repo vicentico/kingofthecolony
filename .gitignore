@@ -18,3 +18,8 @@ packages/
 .env
 .env.local
 .env.*.local
+
+# Local backend database artifacts
+KingOfTheColonyApi/*.db
+KingOfTheColonyApi/*.db-shm
+KingOfTheColonyApi/*.db-wal
