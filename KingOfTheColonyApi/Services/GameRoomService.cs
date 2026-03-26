@@ -433,5 +433,5 @@ public class GameRoomService
     }
 
     private static UserSummary ToSummary(User u) =>
-        new(u.Id, u.DisplayName, u.AvatarUrl, u.Wins, u.Losses);
+        new(u.Id, u.DisplayName, u.AvatarUrl, u.Credits, u.Wins, u.Losses);
 }

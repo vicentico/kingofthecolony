@@ -104,6 +104,8 @@ jobs:
           secrets: |
             Jwt__Key=jwt-key:latest
             ConnectionStrings__DefaultConnection=default-connection:latest
+        # Add ConnectionStrings__MigrationConnection=migration-connection:latest
+        # only if the Cloud Run environment can reach the direct database endpoint.
 
       - name: Output deployed URL
         run: echo "Cloud Run URL ${{ steps.deploy.outputs.url }}"

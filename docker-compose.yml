@@ -11,6 +11,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       PORT: 8080
       ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection:?ConnectionStrings__DefaultConnection is required}
+      ConnectionStrings__MigrationConnection: ${ConnectionStrings__MigrationConnection:-}
       Jwt__Key: ${Jwt__Key:?Jwt__Key is required}
       Jwt__Issuer: ${Jwt__Issuer:-KingOfTheColony}
       Jwt__Audience: ${Jwt__Audience:-KingOfTheColonyApp}

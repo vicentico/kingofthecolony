@@ -15,9 +15,11 @@ if (!string.IsNullOrWhiteSpace(port))
 
 // --- Database ---
 var defaultConnection = builder.Configuration.GetRequiredConnectionString("DefaultConnection", "ConnectionStrings__DefaultConnection");
+var migrationConnection = builder.Configuration.GetOptionalConnectionString("MigrationConnection", "ConnectionStrings__MigrationConnection");
+var applyMigrationsOnStartup = builder.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(defaultConnection));
+    options.UseNpgsql(defaultConnection, npgsqlOptions => npgsqlOptions.MaxBatchSize(1)));
 
 // --- Authentication (JWT) ---
 var jwtKey = builder.Configuration.GetRequiredValue("Jwt:Key", "Jwt__Key");
@@ -82,10 +84,17 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // --- Auto-migrate database ---
-using (var scope = app.Services.CreateScope())
+if (applyMigrationsOnStartup && !string.IsNullOrWhiteSpace(migrationConnection))
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    var migrationOptions = new DbContextOptionsBuilder<AppDbContext>();
+    migrationOptions.UseNpgsql(migrationConnection, npgsqlOptions => npgsqlOptions.MaxBatchSize(1));
+
+    using var migrationDb = new AppDbContext(migrationOptions.Options);
+    migrationDb.Database.Migrate();
+}
+else
+{
+    app.Logger.LogInformation("Skipping startup migrations. Enable Database:ApplyMigrationsOnStartup and configure ConnectionStrings:MigrationConnection to run them.");
 }
 
 app.UseCors("SignalR");

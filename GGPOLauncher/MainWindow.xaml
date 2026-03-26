@@ -408,171 +408,235 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.2*"/>
-                    <ColumnDefinition Width="1.4*"/>
-                    <ColumnDefinition Width="1.2*"/>
-                </Grid.ColumnDefinitions>
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.2*"/>
+                        <ColumnDefinition Width="1.4*"/>
+                        <ColumnDefinition Width="1.2*"/>
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0"
-                            Margin="0,0,16,0">
-                    <Border Style="{StaticResource CardBorder}">
-                        <StackPanel>
-                            <TextBlock Text="Tu perfil"
-                                       FontSize="20"
-                                       FontWeight="Bold"
-                                       Foreground="#F9FAFB"/>
-                            <TextBlock x:Name="TxtProfileName"
-                                       Margin="0,14,0,0"
-                                       Foreground="#E5E7EB"
-                                       FontSize="18"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock x:Name="TxtProfileEmail"
-                                       Margin="0,6,0,0"
-                                       Foreground="#9CA3AF"/>
-                            <TextBlock x:Name="TxtProfileStats"
-                                       Margin="0,12,0,0"
-                                       Foreground="#D1D5DB"
-                                       TextWrapping="Wrap"/>
-                            <TextBlock x:Name="TxtCredits"
-                                       Margin="0,12,0,0"
-                                       Foreground="#FDE68A"
-                                       FontSize="18"
-                                       FontWeight="Bold"/>
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="0,16,0,0">
-                                <Button Content="+1 crédito"
-                                        Style="{StaticResource AccentButton}"
-                                        Click="BtnAddOneCredit_Click"/>
-                                <Button Content="+5 créditos"
-                                        Style="{StaticResource AccentButton}"
-                                        Background="#2563EB"
-                                        Click="BtnAddFiveCredits_Click"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource CardBorder}">
-                        <StackPanel>
-                            <TextBlock Text="Historial reciente de créditos"
-                                       FontSize="18"
-                                       FontWeight="Bold"
-                                       Foreground="#F9FAFB"/>
-                            <ListBox x:Name="ListCreditHistory"
-                                     Margin="0,12,0,0"
-                                     Height="220"
-                                     Background="#111827"
-                                     Foreground="#E5E7EB"
-                                     BorderThickness="0"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-
-                <StackPanel Grid.Column="1"
-                            Margin="0,0,16,0">
-                    <Border Style="{StaticResource CardBorder}">
-                        <StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Sala actual"
+                    <StackPanel Grid.Column="0"
+                                Margin="0,0,16,0">
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <TextBlock Text="Tu perfil"
                                            FontSize="20"
                                            FontWeight="Bold"
                                            Foreground="#F9FAFB"/>
-                                <StackPanel Grid.Column="1"
-                                            Orientation="Horizontal">
-                                    <Button Content="Crear sala"
+                                <TextBlock x:Name="TxtProfileName"
+                                           Margin="0,14,0,0"
+                                           Foreground="#E5E7EB"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock x:Name="TxtProfileEmail"
+                                           Margin="0,6,0,0"
+                                           Foreground="#9CA3AF"/>
+                                <TextBlock x:Name="TxtProfileStats"
+                                           Margin="0,12,0,0"
+                                           Foreground="#D1D5DB"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock x:Name="TxtCredits"
+                                           Margin="0,12,0,0"
+                                           Foreground="#FDE68A"
+                                           FontSize="18"
+                                           FontWeight="Bold"/>
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,16,0,0">
+                                    <Button Content="+1 crédito"
                                             Style="{StaticResource AccentButton}"
-                                            Click="BtnCreateRoom_Click"/>
-                                    <Button Content="Espectar"
+                                            Click="BtnAddOneCredit_Click"/>
+                                    <Button Content="+5 créditos"
                                             Style="{StaticResource AccentButton}"
                                             Background="#2563EB"
-                                            Click="BtnSpectateSelectedRoom_Click"/>
-                                    <Button Content="Entrar a cola"
-                                            Style="{StaticResource AccentButton}"
-                                            Background="#9333EA"
-                                            Click="BtnJoinQueueSelectedRoom_Click"/>
+                                            Click="BtnAddFiveCredits_Click"/>
                                 </StackPanel>
-                            </Grid>
+                            </StackPanel>
+                        </Border>
 
-                            <TextBlock x:Name="TxtRoomStatus"
-                                       Margin="0,14,0,0"
-                                       Foreground="#F3F4F6"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       TextWrapping="Wrap"/>
-                            <TextBlock x:Name="TxtKingInfo"
-                                       Margin="0,10,0,0"
-                                       Foreground="#FCD34D"
-                                       TextWrapping="Wrap"/>
-                            <TextBlock x:Name="TxtChallengerInfo"
-                                       Margin="0,8,0,0"
-                                       Foreground="#93C5FD"
-                                       TextWrapping="Wrap"/>
-                            <TextBlock x:Name="TxtSpectatorCount"
-                                       Margin="0,8,0,0"
-                                       Foreground="#9CA3AF"/>
-                            <TextBlock x:Name="TxtActiveMatchState"
-                                       Margin="0,8,0,0"
-                                       Foreground="#A7F3D0"
-                                       FontSize="13"
-                                       TextWrapping="Wrap"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <TextBlock Text="Historial reciente de créditos"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           Foreground="#F9FAFB"/>
+                                <ListBox x:Name="ListCreditHistory"
+                                         Margin="0,12,0,0"
+                                         Height="220"
+                                         Background="#111827"
+                                         Foreground="#E5E7EB"
+                                         BorderThickness="0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
 
-                            <TextBlock Text="Cola visible"
-                                       Margin="0,18,0,0"
-                                       FontSize="16"
-                                       FontWeight="Bold"
-                                       Foreground="#F9FAFB"/>
-                            <ListBox x:Name="ListQueue"
-                                     Margin="0,10,0,0"
-                                     Height="180"
-                                     Background="#111827"
-                                     Foreground="#E5E7EB"
-                                     BorderThickness="0"/>
-                            <TextBlock x:Name="TxtRealtimeStatus"
-                                       Margin="0,14,0,0"
-                                       Foreground="#A7F3D0"
-                                       TextWrapping="Wrap"/>
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Grid.Column="1"
+                                Margin="0,0,16,0">
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Sala actual"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="#F9FAFB"/>
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal">
+                                        <Button Content="Crear sala"
+                                                Style="{StaticResource AccentButton}"
+                                                Click="BtnCreateRoom_Click"/>
+                                        <Button Content="Espectar"
+                                                Style="{StaticResource AccentButton}"
+                                                Background="#2563EB"
+                                                Click="BtnSpectateSelectedRoom_Click"/>
+                                        <Button Content="Entrar a cola"
+                                                Style="{StaticResource AccentButton}"
+                                                Background="#9333EA"
+                                                Click="BtnJoinQueueSelectedRoom_Click"/>
+                                    </StackPanel>
+                                </Grid>
 
-                    <Border Style="{StaticResource CardBorder}">
-                        <StackPanel>
-                            <TextBlock Text="Salas activas"
-                                       FontSize="18"
-                                       FontWeight="Bold"
-                                       Foreground="#F9FAFB"/>
-                            <ListBox x:Name="ListRooms"
-                                     Margin="0,12,0,0"
-                                     Height="220"
-                                     Background="#111827"
-                                     Foreground="#E5E7EB"
-                                     BorderThickness="0"
-                                     SelectionChanged="ListRooms_SelectionChanged"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                                <TextBlock x:Name="TxtRoomStatus"
+                                           Margin="0,14,0,0"
+                                           Foreground="#F3F4F6"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock x:Name="TxtKingInfo"
+                                           Margin="0,10,0,0"
+                                           Foreground="#FCD34D"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock x:Name="TxtChallengerInfo"
+                                           Margin="0,8,0,0"
+                                           Foreground="#93C5FD"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock x:Name="TxtSpectatorCount"
+                                           Margin="0,8,0,0"
+                                           Foreground="#9CA3AF"/>
+                                <TextBlock x:Name="TxtActiveMatchState"
+                                           Margin="0,8,0,0"
+                                           Foreground="#A7F3D0"
+                                           FontSize="13"
+                                           TextWrapping="Wrap"/>
 
-                <StackPanel Grid.Column="2">
-                    <Border Style="{StaticResource CardBorder}">
-                        <StackPanel>
-                            <TextBlock Text="Ranking histórico"
-                                       FontSize="20"
-                                       FontWeight="Bold"
-                                       Foreground="#F9FAFB"/>
-                            <ListBox x:Name="ListRanking"
-                                     Margin="0,14,0,0"
-                                     Height="470"
-                                     Background="#111827"
-                                     Foreground="#E5E7EB"
-                                     BorderThickness="0"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </Grid>
+                                <TextBlock Text="Cola visible"
+                                           Margin="0,18,0,0"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="#F9FAFB"/>
+                                <ListBox x:Name="ListQueue"
+                                         Margin="0,10,0,0"
+                                         Height="180"
+                                         Background="#111827"
+                                         Foreground="#E5E7EB"
+                                         BorderThickness="0"/>
+                                <TextBlock x:Name="TxtRealtimeStatus"
+                                           Margin="0,14,0,0"
+                                           Foreground="#A7F3D0"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <TextBlock Text="Salas activas"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           Foreground="#F9FAFB"/>
+                                <ListBox x:Name="ListRooms"
+                                         Margin="0,12,0,0"
+                                         Height="220"
+                                         Background="#111827"
+                                         Foreground="#E5E7EB"
+                                         BorderThickness="0"
+                                         SelectionChanged="ListRooms_SelectionChanged">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="0,0,0,10"
+                                                    Padding="12"
+                                                    CornerRadius="10"
+                                                    Background="#0F172A"
+                                                    BorderBrush="#1F3A5F"
+                                                    BorderThickness="1">
+                                                <StackPanel>
+                                                    <DockPanel LastChildFill="False">
+                                                        <TextBlock DockPanel.Dock="Left"
+                                                                   Text="{Binding RoomId, StringFormat=Sala #{0}}"
+                                                                   Foreground="#F9FAFB"
+                                                                   FontSize="15"
+                                                                   FontWeight="Bold"/>
+                                                        <Border DockPanel.Dock="Right"
+                                                                Padding="8,3"
+                                                                CornerRadius="999"
+                                                                Background="#123B33">
+                                                            <TextBlock Text="{Binding Status}"
+                                                                       Foreground="#A7F3D0"
+                                                                       FontSize="11"
+                                                                       FontWeight="SemiBold"/>
+                                                        </Border>
+                                                    </DockPanel>
+
+                                                    <TextBlock Margin="0,10,0,0"
+                                                               Text="{Binding King.DisplayName, StringFormat=Rey: {0}, TargetNullValue=Rey: pendiente}"
+                                                               Foreground="#FCD34D"
+                                                               FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding King.Credits, StringFormat=Créditos del rey: {0}, TargetNullValue=Créditos del rey: 0}"
+                                                               Foreground="#FDE68A"
+                                                               FontSize="12"/>
+
+                                                    <TextBlock Margin="0,8,0,0"
+                                                               Text="{Binding Challenger.DisplayName, StringFormat=Retador: {0}, TargetNullValue=Retador: esperando jugador}"
+                                                               Foreground="#93C5FD"
+                                                               FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding Challenger.Credits, StringFormat=Créditos del retador: {0}, TargetNullValue=Créditos del retador: 0}"
+                                                               Foreground="#BFDBFE"
+                                                               FontSize="12"/>
+
+                                                    <Grid Margin="0,10,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Text="{Binding Queue.Count, StringFormat=Cola: {0}}"
+                                                                   Foreground="#D1D5DB"/>
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding SpectatorCount, StringFormat=Espectadores: {0}}"
+                                                                   Foreground="#D1D5DB"
+                                                                   TextAlignment="Right"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <TextBlock Text="Ranking histórico"
+                                           FontSize="20"
+                                           FontWeight="Bold"
+                                           Foreground="#F9FAFB"/>
+                                <ListBox x:Name="ListRanking"
+                                         Margin="0,14,0,0"
+                                         Height="470"
+                                         Background="#111827"
+                                         Foreground="#E5E7EB"
+                                         BorderThickness="0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
         </Grid>
 
         <Grid x:Name="PanelLegacyLauncher"

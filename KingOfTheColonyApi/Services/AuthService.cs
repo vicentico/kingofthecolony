@@ -9,6 +9,7 @@ using KingOfTheColonyApi.Models;
 using KingOfTheColonyApi.Models.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 
 namespace KingOfTheColonyApi.Services;
 
@@ -65,7 +66,7 @@ public class AuthService
                 Credits = 3 // Welcome bonus
             };
             _db.Users.Add(user);
-            await _db.SaveChangesAsync();
+            await SaveChangesHandlingDuplicateUsersAsync();
         }
         else
         {
@@ -73,7 +74,7 @@ public class AuthService
             user.Email = normalizedEmail;
             user.DisplayName = payload.Name ?? user.DisplayName;
             user.AvatarUrl = payload.Picture ?? user.AvatarUrl;
-            await _db.SaveChangesAsync();
+            await SaveChangesHandlingDuplicateUsersAsync();
         }
 
         var jwt = GenerateJwt(user);
@@ -111,7 +112,7 @@ public class AuthService
         };
 
         _db.Users.Add(user);
-        await _db.SaveChangesAsync();
+        await SaveChangesHandlingDuplicateUsersAsync();
 
         return CreateAuthResponse(user);
     }
@@ -169,6 +170,23 @@ public class AuthService
     {
         if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
             throw new InvalidOperationException("La clave debe tener al menos 8 caracteres.");
+    }
+
+    private async Task SaveChangesHandlingDuplicateUsersAsync()
+    {
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException postgresEx && postgresEx.SqlState == PostgresErrorCodes.UniqueViolation)
+        {
+            throw postgresEx.ConstraintName switch
+            {
+                "IX_Users_Email" => new InvalidOperationException("Ya existe una cuenta registrada con este correo."),
+                "IX_Users_GoogleId" => new InvalidOperationException("La cuenta de Google ya está vinculada a otro usuario."),
+                _ => new InvalidOperationException("No se pudo guardar el usuario porque ya existe un registro duplicado.")
+            };
+        }
     }
 
     private string GenerateJwt(User user)

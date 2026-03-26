@@ -314,6 +314,7 @@ public partial class MainWindow : Window
         var rooms = await _apiClient.GetRoomsAsync();
         var ranking = await _apiClient.GetRankingAsync();
         var credits = await _apiClient.GetCreditHistoryAsync();
+        var selectedRoomId = _selectedRoom?.RoomId;
 
         TxtWelcome.Text = $"Bienvenido, {_currentUser.DisplayName}";
         TxtHeaderSummary.Text = $"Créditos: {_currentUser.Credits} | Victorias: {_currentUser.Wins} | Derrotas: {_currentUser.Losses} | Win Rate: {_currentUser.WinRate:P1}";
@@ -325,20 +326,21 @@ public partial class MainWindow : Window
         ListCreditHistory.ItemsSource = credits.Select(c =>
             $"{c.CreatedAt:yyyy-MM-dd HH:mm} | {c.Type} | {(c.Amount > 0 ? "+" : "")}{c.Amount} | {c.Description}");
 
-        ListRooms.ItemsSource = rooms.Select(r =>
-            $"Sala #{r.RoomId} | Estado: {r.Status} | Rey: {r.King?.DisplayName ?? "N/D"} | Cola: {r.Queue.Count} | Espectadores: {r.SpectatorCount}");
+        ListRooms.ItemsSource = rooms;
 
         ListRanking.ItemsSource = ranking.Select(r =>
             $"#{r.Position} {r.DisplayName} | W:{r.Wins} L:{r.Losses} | WR:{r.WinRate:P1} | Racha:{r.BestStreak} | Score:{r.Score:F0}");
 
-        if (_selectedRoom is not null)
+        if (rooms.Count > 0)
         {
-            var refreshed = await _apiClient.GetRoomAsync(_selectedRoom.RoomId);
-            UpdateRoomState(refreshed);
-        }
-        else if (rooms.Count > 0)
-        {
-            UpdateRoomState(rooms[0]);
+            var roomToShow = selectedRoomId.HasValue
+                ? rooms.FirstOrDefault(room => room.RoomId == selectedRoomId.Value) ?? rooms[0]
+                : rooms[0];
+
+            if (!ReferenceEquals(ListRooms.SelectedItem, roomToShow))
+                ListRooms.SelectedItem = roomToShow;
+
+            UpdateRoomState(roomToShow);
         }
         else
         {
@@ -346,6 +348,7 @@ public partial class MainWindow : Window
             TxtKingInfo.Text = string.Empty;
             TxtChallengerInfo.Text = string.Empty;
             TxtSpectatorCount.Text = string.Empty;
+            TxtActiveMatchState.Text = "No hay partida activa en esta sala.";
             ListQueue.ItemsSource = null;
         }
     }
@@ -480,16 +483,12 @@ public partial class MainWindow : Window
 
     private async void ListRooms_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_apiClient is null || ListRooms.SelectedIndex < 0)
+        if (_apiClient is null || ListRooms.SelectedItem is not RoomStateDto selectedRoom)
             return;
 
         try
         {
-            var rooms = await _apiClient.GetRoomsAsync();
-            if (ListRooms.SelectedIndex >= rooms.Count)
-                return;
-
-            _selectedRoom = rooms[ListRooms.SelectedIndex];
+            _selectedRoom = selectedRoom;
             UpdateRoomState(_selectedRoom);
 
             if (_realtimeClient is not null)
@@ -510,16 +509,16 @@ public partial class MainWindow : Window
         TxtRoomStatus.Text = $"Sala #{room.RoomId} | Estado: {room.Status}";
         TxtKingInfo.Text = room.King is null
             ? "Rey actual: pendiente"
-            : $"Rey actual: {room.King.DisplayName} | W:{room.King.Wins} L:{room.King.Losses}";
+            : $"Rey actual: {room.King.DisplayName} | {room.King.Credits} créditos | W:{room.King.Wins} L:{room.King.Losses}";
         TxtChallengerInfo.Text = room.Challenger is null
             ? "Retador actual: esperando siguiente jugador"
-            : $"Retador actual: {room.Challenger.DisplayName} | W:{room.Challenger.Wins} L:{room.Challenger.Losses}";
+            : $"Retador actual: {room.Challenger.DisplayName} | {room.Challenger.Credits} créditos | W:{room.Challenger.Wins} L:{room.Challenger.Losses}";
         TxtSpectatorCount.Text = $"Espectadores: {room.SpectatorCount}";
         TxtActiveMatchState.Text = _matchCoordinator?.ActiveSession?.RoomId == room.RoomId
             ? $"Partida activa: {_matchCoordinator.ActiveSession.State}"
             : "No hay partida activa en esta sala.";
         ListQueue.ItemsSource = room.Queue.Select(q =>
-            $"#{q.Position} {q.User.DisplayName} | W:{q.User.Wins} L:{q.User.Losses} | desde {q.JoinedAt:HH:mm}");
+            $"#{q.Position} {q.User.DisplayName} | {q.User.Credits} créditos | W:{q.User.Wins} L:{q.User.Losses} | desde {q.JoinedAt:HH:mm}");
     }
 
     private void SetMatchStatus(string message)

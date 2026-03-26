@@ -18,7 +18,7 @@ namespace KingOfTheColonyApi.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    GoogleId = table.Column<string>(type: "text", nullable: false),
+                    GoogleId = table.Column<string>(type: "text", nullable: true),
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     DisplayName = table.Column<string>(type: "text", nullable: false),

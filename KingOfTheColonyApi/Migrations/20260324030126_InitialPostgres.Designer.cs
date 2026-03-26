@@ -309,7 +309,6 @@ namespace KingOfTheColonyApi.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("GoogleId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Losses")

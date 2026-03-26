@@ -43,7 +43,7 @@ public record RoomStateDto(
     List<QueueEntryDto> Queue,
     int SpectatorCount);
 
-public record UserSummary(int Id, string DisplayName, string AvatarUrl, int Wins, int Losses);
+public record UserSummary(int Id, string DisplayName, string AvatarUrl, int Credits, int Wins, int Losses);
 
 public record QueueEntryDto(int Position, UserSummary User, DateTime JoinedAt);
 

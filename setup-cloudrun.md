@@ -23,6 +23,7 @@ Requeridas:
 
 Opcionales:
 
+- `ConnectionStrings__MigrationConnection`
 - `Jwt__Issuer`
 - `Jwt__Audience`
 - `Google__Enabled`
@@ -33,7 +34,8 @@ Opcionales:
 
 1. Crea un archivo `.env` en la raíz usando `.env.example` como base.
 2. Define `Jwt__Key` y `ConnectionStrings__DefaultConnection`.
-3. Levanta la API:
+3. Si quieres aplicar migraciones al arrancar, define también `ConnectionStrings__MigrationConnection` con una conexión directa.
+4. Levanta la API:
 
 ```bash
 docker compose up --build api
@@ -79,7 +81,10 @@ gcloud artifacts repositories create REPOSITORY_NAME \
 echo -n "TU_CLAVE_LARGA_Y_SECRETA" | gcloud secrets create jwt-key \
    --data-file=-
 
-echo -n "Host=db.gtuwxzlzlbhanbcsbhny.supabase.co;Database=postgres;Username=postgres;Password=TU_PASSWORD;SSL Mode=Require;Trust Server Certificate=true" | gcloud secrets create default-connection \
+echo -n "postgresql://postgres.gtuwxzlzlbhanbcsbhny:TU_PASSWORD@aws-0-us-west-2.pooler.supabase.com:6543/postgres?sslmode=require" | gcloud secrets create default-connection \
+   --data-file=-
+
+echo -n "postgresql://postgres:TU_PASSWORD@db.gtuwxzlzlbhanbcsbhny.supabase.co:5432/postgres?sslmode=require" | gcloud secrets create migration-connection \
    --data-file=-
 ```
 
@@ -89,7 +94,10 @@ Si los secretos ya existen:
 echo -n "TU_CLAVE_LARGA_Y_SECRETA" | gcloud secrets versions add jwt-key \
    --data-file=-
 
-echo -n "Host=db.gtuwxzlzlbhanbcsbhny.supabase.co;Database=postgres;Username=postgres;Password=TU_PASSWORD;SSL Mode=Require;Trust Server Certificate=true" | gcloud secrets versions add default-connection \
+echo -n "postgresql://postgres.gtuwxzlzlbhanbcsbhny:TU_PASSWORD@aws-0-us-west-2.pooler.supabase.com:6543/postgres?sslmode=require" | gcloud secrets versions add default-connection \
+   --data-file=-
+
+echo -n "postgresql://postgres:TU_PASSWORD@db.gtuwxzlzlbhanbcsbhny.supabase.co:5432/postgres?sslmode=require" | gcloud secrets versions add migration-connection \
    --data-file=-
 ```
 
@@ -147,4 +155,10 @@ Y despliega públicamente el servicio de Cloud Run con `--allow-unauthenticated`
 
 La API ya no queda configurada para SQLite. Ahora usa PostgreSQL mediante `Npgsql` y espera una cadena en `ConnectionStrings__DefaultConnection`.
 
-La cadena que me compartiste apunta a un host PostgreSQL administrado en `supabase.co`. Si luego decides moverla a Cloud SQL, no necesitas cambiar código: solo cambia el valor del secreto `default-connection`.
+La API acepta tanto el formato nativo de Npgsql como URLs `postgresql://...`, `postgres://...` y `jdbc:postgresql://...`. Si recibe una URL, la convierte internamente antes de crear la conexión.
+
+Usa `ConnectionStrings__DefaultConnection` para el runtime de la app. En Supabase, esto puede apuntar al pooler `aws-0-us-west-2.pooler.supabase.com:6543`.
+
+Usa `ConnectionStrings__MigrationConnection` para `db.Database.Migrate()`. En Supabase, esto debería apuntar a la conexión directa `db.gtuwxzlzlbhanbcsbhny.supabase.co:5432` si tu entorno soporta ese acceso.
+
+Si no defines `ConnectionStrings__MigrationConnection`, la app arranca sin ejecutar migraciones automáticas.

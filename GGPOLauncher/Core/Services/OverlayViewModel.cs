@@ -63,12 +63,12 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
         RoomTitle = $"Sala #{room.RoomId} | {room.Status}";
         KingLabel = room.King is null
             ? "Rey pendiente"
-            : $"Rey: {room.King.DisplayName} | W:{room.King.Wins} L:{room.King.Losses}";
+            : $"Rey: {room.King.DisplayName} | {room.King.Credits} cr | W:{room.King.Wins} L:{room.King.Losses}";
         ChallengerLabel = room.Challenger is null
             ? "Retador pendiente"
-            : $"Retador: {room.Challenger.DisplayName} | W:{room.Challenger.Wins} L:{room.Challenger.Losses}";
+            : $"Retador: {room.Challenger.DisplayName} | {room.Challenger.Credits} cr | W:{room.Challenger.Wins} L:{room.Challenger.Losses}";
         QueueSummary = room.Queue.Count > 0
-            ? $"Siguiente: {room.Queue[0].User.DisplayName} | Cola: {room.Queue.Count}"
+            ? $"Siguiente: {room.Queue[0].User.DisplayName} ({room.Queue[0].User.Credits} cr) | Cola: {room.Queue.Count}"
             : "Sin jugadores en cola";
         SpectatorSummary = $"Espectadores: {room.SpectatorCount}";
     }

@@ -14,21 +14,30 @@ public class CreditService
     {
         if (amount <= 0) return (false, 0);
 
-        var user = await _db.Users.FindAsync(userId);
-        if (user is null) return (false, 0);
+        using var transaction = _db.Database.BeginTransaction();
 
-        user.Credits += amount;
+        var updatedRows = _db.Database.ExecuteSqlInterpolated($@"
+            UPDATE ""Users""
+            SET ""Credits"" = ""Credits"" + {amount}
+            WHERE ""Id"" = {userId}");
 
-        _db.CreditTransactions.Add(new CreditTransaction
+        if (updatedRows == 0)
         {
-            UserId = userId,
-            Amount = amount,
-            Type = "Purchase",
-            Description = $"Compra de {amount} crédito(s)"
-        });
+            transaction.Rollback();
+            return (false, 0);
+        }
 
-        await _db.SaveChangesAsync();
-        return (true, user.Credits);
+        _db.Database.ExecuteSqlInterpolated($@"
+            INSERT INTO ""CreditTransactions"" (""UserId"", ""Amount"", ""Type"", ""Description"", ""CreatedAt"")
+            VALUES ({userId}, {amount}, {"Purchase"}, {$"Compra de {amount} crédito(s)"}, {DateTime.UtcNow})");
+
+        var newBalance = _db.Users
+            .Where(u => u.Id == userId)
+            .Select(u => u.Credits)
+            .Single();
+
+        transaction.Commit();
+        return (true, newBalance);
     }
 
     public async Task<List<CreditTransaction>> GetHistoryAsync(int userId, int limit = 20)
