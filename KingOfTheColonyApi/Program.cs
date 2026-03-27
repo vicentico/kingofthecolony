@@ -6,6 +6,7 @@ using KingOfTheColonyApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,36 @@ builder.Services.AddScoped<CreditService>();
 // --- Controllers + SignalR ---
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "KingOfTheColony API",
+        Version = "v1"
+    });
+
+    var bearerScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "JWT Bearer token. Example: Bearer {token}",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+
+    options.AddSecurityDefinition("Bearer", bearerScheme);
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        [bearerScheme] = Array.Empty<string>()
+    });
+});
 
 // --- CORS (allow WPF desktop client) ---
 builder.Services.AddCors(options =>
@@ -96,6 +127,13 @@ else
 {
     app.Logger.LogInformation("Skipping startup migrations. Enable Database:ApplyMigrationsOnStartup and configure ConnectionStrings:MigrationConnection to run them.");
 }
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "KingOfTheColony API v1");
+    options.RoutePrefix = "swagger";
+});
 
 app.UseCors("SignalR");
 app.UseAuthentication();
