@@ -1,4 +1,4 @@
-@KingOfTheColonyApi_HostAddress = http://localhost:5153
+@KingOfTheColonyApi_HostAddress = https://api-contenedor-638144394845.southamerica-west1.run.app
 
 GET {{KingOfTheColonyApi_HostAddress}}/weatherforecast/
 Accept: application/json

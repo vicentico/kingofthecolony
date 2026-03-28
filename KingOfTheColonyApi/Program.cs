@@ -4,6 +4,7 @@ using KingOfTheColonyApi.Extensions;
 using KingOfTheColonyApi.Hubs;
 using KingOfTheColonyApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -67,6 +68,7 @@ builder.Services.AddScoped<CreditService>();
 // --- Controllers + SignalR ---
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
+builder.Services.AddHealthChecks();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -138,6 +140,11 @@ app.UseSwaggerUI(options =>
 app.UseCors("SignalR");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    AllowCachingResponses = false
+}).AllowAnonymous();
 
 app.MapControllers();
 app.MapHub<GameHub>("/hubs/game");
