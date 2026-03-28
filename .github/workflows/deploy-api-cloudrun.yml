@@ -97,8 +97,7 @@ jobs:
             --allow-unauthenticated
             --port=8080
           env_vars: |
-            ASPNETCORE_ENVIRONMENT=Production
-            PORT=8080
+            ASPNETCORE_ENVIRONMENT=Production 
             Jwt__Issuer=KingOfTheColony
             Jwt__Audience=KingOfTheColonyApp
             Google__Enabled=false
