@@ -176,7 +176,6 @@
                                     <TextBox x:Name="TxtApiBaseUrl"
                                              Margin="0,10,0,0"
                                              Height="38"
-                                             Text="http://localhost:5153"
                                              Padding="10,6"
                                              Background="#1F2937"
                                              Foreground="#F9FAFB"

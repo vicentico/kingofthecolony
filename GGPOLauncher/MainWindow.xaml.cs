@@ -9,11 +9,13 @@ using GGPOLauncher.Core.Network;
 using GGPOLauncher.Core.Process;
 using GGPOLauncher.Core.Services;
 using GGPOLauncher.Utils;
+using Microsoft.Extensions.Configuration;
 
 namespace GGPOLauncher;
 
 public partial class MainWindow : Window
 {
+    private const string DefaultApiBaseUrl = "http://localhost:5153";
     private readonly IEmulatorLauncher _launcher = new FbNeoLauncher();
     private MatchSessionCoordinator? _matchCoordinator;
     private INetworkManager? _networkManager;
@@ -25,12 +27,30 @@ public partial class MainWindow : Window
     private IRealtimeClient? _realtimeClient;
     private UserProfile? _currentUser;
     private RoomStateDto? _selectedRoom;
-    private string _apiBaseUrl = "http://localhost:5153";
+    private string _apiBaseUrl = DefaultApiBaseUrl;
 
     public MainWindow()
     {
+        _apiBaseUrl = LoadApiBaseUrl();
         InitializeComponent();
+        TxtApiBaseUrl.Text = _apiBaseUrl;
         ShowLoginMode();
+    }
+
+    private static string LoadApiBaseUrl()
+    {
+        var settingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+        if (!File.Exists(settingsPath))
+            return DefaultApiBaseUrl;
+
+        using var settingsStream = File.OpenRead(settingsPath);
+
+        var configuration = new ConfigurationBuilder()
+            .AddJsonStream(settingsStream)
+            .Build();
+
+        var configuredValue = configuration["Api:BaseUrl"];
+        return string.IsNullOrWhiteSpace(configuredValue) ? DefaultApiBaseUrl : configuredValue.Trim();
     }
 
     private void BtnShowLoginMode_Click(object sender, RoutedEventArgs e)
