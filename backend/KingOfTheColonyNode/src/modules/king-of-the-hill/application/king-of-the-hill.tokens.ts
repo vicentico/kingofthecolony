@@ -1,0 +1,1 @@
+export const KING_ROOM_REPOSITORY = Symbol('KING_ROOM_REPOSITORY');

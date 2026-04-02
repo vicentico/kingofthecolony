@@ -1,0 +1,3 @@
+export const AUTH_USER_REPOSITORY = Symbol('AUTH_USER_REPOSITORY');
+export const PASSWORD_HASHER = Symbol('PASSWORD_HASHER');
+export const AUTH_TOKEN_SERVICE = Symbol('AUTH_TOKEN_SERVICE');
